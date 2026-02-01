@@ -3,13 +3,92 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DEEPS – Trips Calendar</title>
+  <title>DEEPS – Trips</title>
   <link rel="stylesheet" href="assets/styles.css" />
 
   <!-- FullCalendar (CDN) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+  <style>
+    /* Trips page extras (kept inside this file so you don't need to edit styles.css) */
+    .heroTrips{
+      margin-top:16px;
+      padding:18px;
+      border-radius:24px;
+      border:1px solid var(--line);
+      background: radial-gradient(circle at top left, rgba(246,200,0,.18), transparent 55%),
+                  radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 55%),
+                  rgba(11,20,56,.75);
+    }
+    .heroTrips h1{font-size:28px;margin:0 0 6px}
+    .heroTrips p{margin:0;color:var(--muted)}
+    .twoCol{display:grid;grid-template-columns: 1.05fr .95fr; gap:12px; margin-top:12px}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+    .tripCard{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(11,20,56,.78);
+      padding:14px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .tripCard:hover{transform: translateY(-2px); background:rgba(11,20,56,.92)}
+    .tripTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .tripTitle{font-weight:800;letter-spacing:-.01em}
+    .badge{
+      font-size:11px; padding:4px 9px; border-radius:999px;
+      border:1px solid var(--line); color:var(--muted);
+      background:rgba(255,255,255,.06); white-space:nowrap;
+    }
+    .tripMeta{margin-top:8px; color:var(--muted); font-size:13px; line-height:1.55}
+    .tripMeta b{color:var(--text); font-weight:600}
+    .tripBtns{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+    .sectionTitle{margin:16px 0 8px; font-size:18px; letter-spacing:-.02em}
+
+    /* Modal */
+    .modalBg{
+      position:fixed; inset:0; background:rgba(0,0,0,.6);
+      display:none; align-items:center; justify-content:center;
+      padding:18px; z-index:50;
+    }
+    .modal{
+      width:min(720px, 100%);
+      border-radius:22px;
+      border:1px solid var(--line);
+      background: rgba(5,10,34,.92);
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .modalHeader{
+      padding:14px 16px;
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+    .modalHeader h3{margin:0;font-size:18px;letter-spacing:-.02em}
+    .closeBtn{
+      border:1px solid var(--line); background:rgba(255,255,255,.06);
+      color:var(--text); border-radius:12px; padding:8px 10px; cursor:pointer;
+    }
+    .modalBody{padding:14px 16px}
+    .kv{display:grid; grid-template-columns: 150px 1fr; gap:10px; margin:10px 0}
+    .kv div:first-child{color:var(--muted); font-size:12px}
+    .kv div:last-child{font-size:13px}
+    .modalActions{display:flex; gap:10px; flex-wrap:wrap; padding:0 16px 16px}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px}
+
+    @media (max-width: 980px){
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .twoCol{grid-template-columns:1fr}
+      .kv{grid-template-columns: 120px 1fr}
+    }
+    @media (max-width: 560px){
+      .cards{grid-template-columns:1fr}
+    }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <div class="nav">
@@ -17,7 +96,7 @@
         <img src="assets/logo.png" alt="Deeps logo" />
         <div>
           <b>DEEPS</b>
-          <small>Trips Calendar</small>
+          <small>Trips</small>
         </div>
       </a>
 
@@ -25,49 +104,184 @@
         <a href="index.html">Home</a>
         <a href="trips.html">Trips</a>
         <a href="contact.html">Contact</a>
-        <a href="https://www.instagram.com/deeps.diving?igsh=MXdsZjF5eHlid3l2Yg==" target="_blank" rel="noreferrer">Instagram</a>
+        <a href="https://www.instagram.com/deeps.diving" target="_blank" rel="noreferrer">Instagram</a>
       </div>
 
       <a class="btn" href="contact.html">Join / Ask</a>
     </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h1 style="font-size:26px;margin:0 0 8px;">Trips Calendar</h1>
-      <p style="margin-bottom:12px;">
-        Click any trip for details. Trips are loaded from <b>data/trips.json</b>.
+    <!-- HERO -->
+    <div class="heroTrips">
+      <h1>Trips & Calendar</h1>
+      <p>
+        We organize community dive trips worldwide — and we frequently dive in <b>Dahab, Egypt</b>.
+        Browse upcoming trips below, or check the full calendar.
       </p>
 
+      <div class="twoCol">
+        <div class="card">
+          <div class="sectionTitle" style="margin-top:0;">Next trips</div>
+          <p style="margin-bottom:10px;">Click a trip to open full details and join.</p>
+          <div id="tripCards" class="cards"></div>
+          <div class="hint">Tip: edit <b>data/trips.json</b> to add/change trips.</div>
+        </div>
+
+        <div class="card">
+          <div class="sectionTitle" style="margin-top:0;">Quick info</div>
+          <p>
+            After you join, we’ll send: dive plan, recommended gear, meeting points, and payment details (if any).
+          </p>
+          <div class="hint" style="margin-top:10px;">
+            Want “price / spots / level icons”? Already supported in the JSON.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="card" style="margin-top:12px;">
+      <div class="sectionTitle" style="margin-top:0;">Calendar</div>
       <div id="calendar"></div>
     </div>
 
-    <div class="footer">Tip: edit <b>data/trips.json</b> to add / change trips.</div>
+    <div class="footer">© <span id="y"></span> DEEPS</div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalBg" class="modalBg" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalHeader">
+        <div>
+          <h3 id="mTitle">Trip</h3>
+          <div id="mDates" style="color:var(--muted);font-size:12px;margin-top:2px;"></div>
+        </div>
+        <button class="closeBtn" id="closeModal">Close</button>
+      </div>
+      <div class="modalBody" id="mBody"></div>
+      <div class="modalActions" id="mActions"></div>
+    </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', async function () {
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    const modalBg = document.getElementById('modalBg');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    function fmtDate(d){
+      if(!d) return '';
+      // d is like YYYY-MM-DD
+      const parts = d.split('-');
+      if(parts.length !== 3) return d;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function openModal(trip){
+      document.getElementById('mTitle').textContent = trip.title || 'Trip';
+      const dates = trip.end
+        ? `${fmtDate(trip.start)} → ${fmtDate(trip.end)}`
+        : fmtDate(trip.start);
+      document.getElementById('mDates').textContent = `${dates} • ${trip.location || ''}`;
+
+      const body = document.getElementById('mBody');
+      body.innerHTML = `
+        <div class="kv"><div>Location</div><div>${trip.location || '-'}</div></div>
+        <div class="kv"><div>Level</div><div>${trip.level || '-'}</div></div>
+        <div class="kv"><div>Price</div><div>${trip.price || '-'}</div></div>
+        <div class="kv"><div>Spots</div><div>${(trip.spots ?? '-')}</div></div>
+        <div class="kv"><div>Notes</div><div>${trip.note || '-'}</div></div>
+      `;
+
+      const actions = document.getElementById('mActions');
+      actions.innerHTML = '';
+
+      if (trip.whatsapp) {
+        const a = document.createElement('a');
+        a.className = 'btn primary';
+        a.href = trip.whatsapp;
+        a.target = '_blank';
+        a.rel = 'noreferrer';
+        a.textContent = 'Join via WhatsApp';
+        actions.appendChild(a);
+      }
+
+      if (trip.link) {
+        const a2 = document.createElement('a');
+        a2.className = 'btn';
+        a2.href = trip.link;
+        a2.target = '_blank';
+        a2.rel = 'noreferrer';
+        a2.textContent = 'Open link';
+        actions.appendChild(a2);
+      }
+
+      modalBg.style.display = 'flex';
+    }
+
+    function closeModal(){
+      modalBg.style.display = 'none';
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    modalBg.addEventListener('click', (e) => {
+      if (e.target === modalBg) closeModal();
+    });
+
+    async function loadTrips(){
+      const res = await fetch('data/trips.json', { cache: 'no-store' });
+      if(!res.ok) throw new Error('Failed to load data/trips.json');
+      const data = await res.json();
+      return (data.trips || []);
+    }
+
+    function renderCards(trips){
+      const container = document.getElementById('tripCards');
+      container.innerHTML = '';
+
+      if (!trips.length) {
+        container.innerHTML = `<div style="color:var(--muted);font-size:13px;">No trips yet. Add trips in <b>data/trips.json</b>.</div>`;
+        return;
+      }
+
+      // sort by start date
+      trips.sort((a,b) => (a.start||'').localeCompare(b.start||''));
+
+      for (const t of trips) {
+        const card = document.createElement('div');
+        card.className = 'tripCard';
+        card.addEventListener('click', () => openModal(t));
+
+        const dates = t.end ? `${fmtDate(t.start)} → ${fmtDate(t.end)}` : fmtDate(t.start);
+        const spotsText = (t.spots !== undefined && t.spots !== null) ? `${t.spots} spots` : 'Spots: -';
+
+        card.innerHTML = `
+          <div class="tripTop">
+            <div class="tripTitle">${t.title || 'Trip'}</div>
+            <div class="badge">${t.location || 'Location'}</div>
+          </div>
+          <div class="tripMeta">
+            <div><b>Dates:</b> ${dates}</div>
+            <div><b>Level:</b> ${t.level || '-'}</div>
+            <div><b>Price:</b> ${t.price || '-'}</div>
+            <div><b>${spotsText}</b></div>
+          </div>
+          <div class="tripBtns">
+            ${t.whatsapp ? `<span class="badge">WhatsApp join</span>` : ``}
+            ${t.note ? `<span class="badge">Details inside</span>` : ``}
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function renderCalendar(trips){
       const calendarEl = document.getElementById('calendar');
-
-      async function loadTrips(){
-        const res = await fetch('data/trips.json', { cache: 'no-store' });
-        if(!res.ok) throw new Error('Failed to load data/trips.json');
-        const data = await res.json();
-        const trips = data.trips || [];
-        return trips.map(t => ({
-          title: `${t.title} • ${t.location}`,
-          start: t.start,
-          end: t.end || null,
-          url: t.link || null,
-          extendedProps: t
-        }));
-      }
-
-      let events = [];
-      try {
-        events = await loadTrips();
-      } catch (e) {
-        console.error(e);
-        alert('Could not load trips.json. Make sure the file exists in /data and you uploaded it to GitHub.');
-      }
+      const events = trips.map(t => ({
+        title: `${t.title} • ${t.location || ''}`,
+        start: t.start,
+        end: t.end || null,
+        extendedProps: t
+      }));
 
       const cal = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -75,20 +289,18 @@
         events,
         eventClick: function(info){
           info.jsEvent.preventDefault();
-          const t = info.event.extendedProps || {};
-          const msg =
-            `${t.title || info.event.title}\n` +
-            `Location: ${t.location || ''}\n` +
-            `Level: ${t.level || ''}\n` +
-            `Dates: ${info.event.startStr}` + (info.event.endStr ? ` → ${info.event.endStr}` : '') +
-            (t.note ? `\n\n${t.note}` : '');
-          alert(msg);
-          if (t.link) window.open(t.link, '_blank');
+          openModal(info.event.extendedProps || {});
         }
       });
 
       cal.render();
-    });
+    }
+
+    (async function init(){
+      const trips = await loadTrips();
+      renderCards(trips);
+      renderCalendar(trips);
+    })();
   </script>
 </body>
 </html>
