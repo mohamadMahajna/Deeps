@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEPS – Trips Calendar</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- FullCalendar (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+  <style>
+    /* Make calendar match your theme */
+    .fc { color: var(--text); }
+    .fc .fc-toolbar-title { font-size: 18px; }
+    .fc .fc-button { background: rgba(255,255,255,.08); border: 1px solid var(--line); }
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:not(:disabled):active { background: rgba(255,255,255,.14); }
+    .fc .fc-daygrid-day { background: rgba(11,20,56,.35); }
+    .fc .fc-scrollgrid { border-color: var(--line); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="Deeps logo" />
+        <div>
+          <b>DEEPS</b>
+          <small>Trips Calendar</small>
+        </div>
+      </a>
+
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="trips.html">Trips</a>
+        <a href="contact.html">Contact</a>
+        <a href="https://www.instagram.com/deeps.diving?igsh=MXdsZjF5eHlid3l2Yg==" target="_blank" rel="noreferrer">Instagram</a>
+      </div>
+
+      <a class="btn" href="contact.html">Join / Ask</a>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h1 style="font-size:26px;margin:0 0 8px;">Trips Calendar</h1>
+      <p style="margin-bottom:12px;">
+        Click any trip for details. (You can edit trips inside the code below.)
+      </p>
+
+      <div id="calendar"></div>
+    </div>
+
+    <div class="footer">Tip: add trips by editing the <b>events</b> list in this file.</div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+
+      // EDIT YOUR TRIPS HERE ✅
+      const events = [
+        {
+          title: 'Dahab Weekend',
+          start: '2026-03-06',
+          end: '2026-03-09',
+          url: 'https://www.instagram.com/deeps.diving?igsh=MXdsZjF5eHlid3l2Yg=='
+        },
+        {
+          title: 'Dahab Discovery Week',
+          start: '2026-04-10',
+          end: '2026-04-18'
+        }
+      ];
+
+      const cal = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        events,
+        eventClick: function(info){
+          // If an event has url, open it
+          if (info.event.url) {
+            info.jsEvent.preventDefault();
+            window.open(info.event.url, '_blank');
+          } else {
+            alert(info.event.title + "\\n" + (info.event.startStr || ""));
+          }
+        }
+      });
+
+      cal.render();
+    });
+  </script>
+</body>
+</html>
