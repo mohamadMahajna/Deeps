@@ -1,1 +1,94 @@
-<!doctype html><html><body><h1>Trips Calendar</h1><div id='calendar'></div></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEPS – Trips Calendar</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- FullCalendar (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="Deeps logo" />
+        <div>
+          <b>DEEPS</b>
+          <small>Trips Calendar</small>
+        </div>
+      </a>
+
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="trips.html">Trips</a>
+        <a href="contact.html">Contact</a>
+        <a href="https://www.instagram.com/deeps.diving?igsh=MXdsZjF5eHlid3l2Yg==" target="_blank" rel="noreferrer">Instagram</a>
+      </div>
+
+      <a class="btn" href="contact.html">Join / Ask</a>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h1 style="font-size:26px;margin:0 0 8px;">Trips Calendar</h1>
+      <p style="margin-bottom:12px;">
+        Click any trip for details. Trips are loaded from <b>data/trips.json</b>.
+      </p>
+
+      <div id="calendar"></div>
+    </div>
+
+    <div class="footer">Tip: edit <b>data/trips.json</b> to add / change trips.</div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const calendarEl = document.getElementById('calendar');
+
+      async function loadTrips(){
+        const res = await fetch('data/trips.json', { cache: 'no-store' });
+        if(!res.ok) throw new Error('Failed to load data/trips.json');
+        const data = await res.json();
+        const trips = data.trips || [];
+        return trips.map(t => ({
+          title: `${t.title} • ${t.location}`,
+          start: t.start,
+          end: t.end || null,
+          url: t.link || null,
+          extendedProps: t
+        }));
+      }
+
+      let events = [];
+      try {
+        events = await loadTrips();
+      } catch (e) {
+        console.error(e);
+        alert('Could not load trips.json. Make sure the file exists in /data and you uploaded it to GitHub.');
+      }
+
+      const cal = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        events,
+        eventClick: function(info){
+          info.jsEvent.preventDefault();
+          const t = info.event.extendedProps || {};
+          const msg =
+            `${t.title || info.event.title}\n` +
+            `Location: ${t.location || ''}\n` +
+            `Level: ${t.level || ''}\n` +
+            `Dates: ${info.event.startStr}` + (info.event.endStr ? ` → ${info.event.endStr}` : '') +
+            (t.note ? `\n\n${t.note}` : '');
+          alert(msg);
+          if (t.link) window.open(t.link, '_blank');
+        }
+      });
+
+      cal.render();
+    });
+  </script>
+</body>
+</html>

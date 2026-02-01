@@ -1,3 +1,27 @@
 backend:
   name: git-gateway
   branch: main
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+collections:
+  - name: "trips"
+    label: "Trips"
+    files:
+      - label: "Trips List"
+        name: "tripslist"
+        file: "data/trips.json"
+        format: "json"
+        fields:
+          - label: "Trips"
+            name: "trips"
+            widget: "list"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Start date", name: "start", widget: "datetime", format: "YYYY-MM-DD", time_format: false }
+              - { label: "End date", name: "end", widget: "datetime", format: "YYYY-MM-DD", time_format: false, required: false }
+              - { label: "Location", name: "location", widget: "string", default: "Dahab, Egypt" }
+              - { label: "Level", name: "level", widget: "string", default: "All levels" }
+              - { label: "Note", name: "note", widget: "string", required: false }
+              - { label: "Link", name: "link", widget: "string", required: false }

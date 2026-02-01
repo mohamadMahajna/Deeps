@@ -1,1 +1,22 @@
-{ "trips": [] }
+{
+  "trips": [
+    {
+      "title": "Dahab Weekend",
+      "start": "2026-03-06",
+      "end": "2026-03-09",
+      "location": "Dahab, Egypt",
+      "level": "All levels",
+      "note": "Shore dives + chill evenings",
+      "link": "https://www.instagram.com/deeps.diving"
+    },
+    {
+      "title": "Dahab Discovery Week",
+      "start": "2026-04-10",
+      "end": "2026-04-18",
+      "location": "Dahab, Egypt",
+      "level": "Certified divers (or course add-on)",
+      "note": "Plan: Lighthouse, Canyon, Blue Hole (conditions permitting).",
+      "link": "https://www.instagram.com/deeps.diving"
+    }
+  ]
+}
